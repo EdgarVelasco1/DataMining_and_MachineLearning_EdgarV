@@ -1,0 +1,262 @@
+---
+title: "HandsOn 02"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(ggplot2)
+library(vegan)
+library(dlookr)
+library(conflicted)
+library(dplyr)
+library(tidyverse)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+# CALIDAD DE DATOS Y PRE-PROCESAMIENTO
+## 1.- Evaluación de la Calidad de los Datos
+### Cargar los siguientes paquetes dplyr, na.tools, tidyimpute (versión de github decisionpatterns/tidyimpute”) Cargar el data set carInsurance que trata de las puntuaciones de riesgo de seguro de los carros basado en varias caracteristicas de cada carro
+
+#### a) Revisar si hay algún valor no agregado
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns 
+##df
+any(is.na(df))
+## si hay valores NA
+```
+### b) Contar el numero de casos que tienen almenos un valor no agregado
+```{r}
+
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+##df
+df1 <- df %>%
+    filter(any(is.na(df)))%>%
+    count()
+## el numero de NA´s es:
+df1
+```
+
+### c) crear un nuevo data set a partir de la remoción de todos los casos que tienen valores no agregados
+
+```{r}
+
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+new_dataset <- df %>%
+    drop_na()
+## de esta forma se eliminan las filas que contienen NA
+head(new_dataset)
+```
+### d) crear un nuevo dataset a partir del reemplazo de todos los valores no agregados por 0
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+new_dataset <- df %>% 
+    mutate_all(~ifelse(is.na(.), 0, .))
+## observamos que se reemplaza todos los NA por 0 y en el caso que haya un NA en categorias, le cambia a int y la categoria  se transforma en numero
+head(new_dataset)
+```
+
+### e) Crear un nuevo dataset a partir del ingreso del promedio en todas las columnas las cuales tienen sus datos de tipo double
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+new_dataset <- df %>% 
+    mutate_all(~ifelse(is.na(.), 0, .))
+
+media_doubles <- new_dataset %>%
+                  select_if(is.double) %>%
+                  summarize(across(everything(), mean))
+
+media_doubles
+
+```
+
+### f) Crear un nuevo dataset a partir del ingreso de la moda en todas las columnas con valores de tipo Integer
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+new_dataset <- df %>% 
+    mutate_all(~ifelse(is.na(.), 0, .))
+############################FUNCION MODA##############################
+Moda <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+######################################################################
+moda_integer <- new_dataset %>%
+                  select_if(is.integer) %>%
+                  summarize(across(everything(), Moda))
+
+moda_integer
+
+```
+
+### f) Crear un nuevo data set a partir del ingreso de valores mas frecuentes para la columna "inDoors".
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+new_dataset <- df %>% 
+    mutate_all(~ifelse(is.na(.), 0, .))
+
+tabla_nDoors <- new_dataset %>%
+                select(nDoors)
+tabla_nDoors
+
+tabla_mas_frecuente <- table(tabla_nDoors)
+
+valor_mas_frecuente <- names(tabla_mas_frecuente)[tabla_mas_frecuente == max(tabla_mas_frecuente)]
+
+## muestra el valor mas frecuente entre 0, 1, 2 
+valor_mas_frecuente
+
+```
+
+### g) Combinar los tres últimas imputaciones para obtener un dataset final, ¿hay algunos casos duplicados?
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+new_dataset <- df %>% 
+    mutate_all(~ifelse(is.na(.), 0, .))
+
+media_doubles <- new_dataset %>%
+                  select_if(is.double) %>%
+                  summarize(across(everything(), mean))
+##########DATASET 1###############
+media_doubles
+##################################
+
+############################FUNCION MODA##############################
+Moda <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+######################################################################
+moda_integer <- new_dataset %>%
+                  select_if(is.integer) %>%
+                  summarize(across(everything(), Moda))
+###########DATASET 2###############
+moda_integer
+##################################
+
+tabla_nDoors <- new_dataset %>%
+                select(nDoors)
+tabla_nDoors
+
+tabla_mas_frecuente <- table(tabla_nDoors)
+
+valor_mas_frecuente <- names(tabla_mas_frecuente)[tabla_mas_frecuente == max(tabla_mas_frecuente)]
+
+## muestra el valor mas frecuente entre 0, 1, 2 
+###########DATASET 3###############
+valor_mas_frecuente
+###################################
+
+df_final <- merge(media_doubles,moda_integer)
+
+df_final
+
+dup <- any(duplicated(df_final))
+## no se encontró valores duplicados
+dup
+
+
+```
+# 2.- Pre procesamiento de datos
+
+## 2. Cargar el paquete dlookr, utilizar el mismo dataset carInsurance y aplicar las siguientes transformacionespara el atrbuto precio. ser critico con los resultados obtenidos.
+
+### (a) Apply range-based normalization and z-score normalization.
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+
+df_rango_base_n <- transform(df$price, method = "minmax")
+df_zscore <- transform(df$price, method = "zscore")
+plot(df_rango_base_n)
+plot(df_zscore)
+## el resultado no varia las gráficas
+```
+
+#### b) Discretizar lo dentro del rango de 4 frecuencias iguales y dentro de 4 rango de igual  amplitud
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+discretizacion <- binning(df$price, nbins = 4)
+summary(discretizacion)
+plot(discretizacion)
+```
+
+## 3 con la semilla 111019 obtener las siguientes muestras sobre la dataset carInsurance
+
+#### una muestra aleatoria del 60% de los casos con reemplazo
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+
+sampled_df <- df %>% sample_frac(0.6)
+sampled_df
+## de las 205 filas me ha tomado una muestra solo del 60% que serian 123 filas
+
+```
+#### un muestreo estratificado del 60% de los casos de carros.de acuerdo al atributo tipo de combustible (fuelType)
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carInsurance.Rdata") 
+## ls()
+df <- carIns
+
+stratified_sample <- df %>%
+  group_by(fuelType) %>%
+  sample_frac(0.6)
+##ahora observamos que nos trae el 60% de la muestra pero agrupado por tipo de combustible
+stratified_sample
+```
+
+#### Utilizar la tabla de funciones para inspeccionar la distribución en cada uno de las dos muestra de arriba.
+
+```{r}
+muestra1 <- sampled_df
+muestra2 <- stratified_sample
+
+distribucion <- data.frame(
+  Muestra = rep(c("Muestra 1", "Muestra 2"), each = 22),
+  Valor = c(muestra1, muestra2)
+)
+
+ggplot(distribucion, aes(x = Valor, fill = Muestra)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Valor", y = "Densidad", title = "Gráfico de Distribución de dos Muestras")
+```
+

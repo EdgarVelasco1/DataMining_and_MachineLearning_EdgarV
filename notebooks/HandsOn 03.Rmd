@@ -1,0 +1,185 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(reshape2)
+library(gridExtra)
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+# 3 DATA EXPLORATION
+
+## 1 Extracto
+
+### cargar los datos del data set carIns_final.RData la cual ya tiene descrtados los valores NA
+
+#### 1 usando el paquete de dplyr, responda las siguientes preguntas
+
+##### a) Obtener el número de carros agrupados  por bodystyle
+
+```{r}
+load("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/HandsOn_Data/carIns_final.Rdata")
+## ls()
+
+df <- carIns_final
+
+num_carros_por_bodystile <- df %>%
+                            group_by(bodyStyle) %>%
+                            count()
+## NOS MUESTRA EL NUMERO DE CARROS POR CADA BODYSTYLE
+num_carros_por_bodystile
+                            
+```
+##### b) Obtener el número de carros agrupados  por bodystyle y ademas por fuelType
+
+```{r}
+num_carros_por_bodystyle_fueltype <- df %>%
+                                    group_by(bodyStyle,fuelType) %>%
+                                    count()
+
+## NOS MUESTRA EL NUMERO DE VEHÍCULOS SI ESTE ES A GASOLINA O A DIESEL Y POR CADA DISEÑO 
+num_carros_por_bodystyle_fueltype
+                                    
+```
+
+##### c) Obtener la media y la desviación estandar del atributo cityMpg agrupado por bodyStyle y en orden ascendente
+
+```{r}
+media_st_cityMpg_por_bodystyle <- df %>%
+                                  group_by(bodyStyle)%>%
+                                  summarise(cityMpg_mean = mean(cityMpg),cityMpg_st = sd(cityMpg))%>%
+                                  arrange(cityMpg_mean,cityMpg_st)
+media_st_cityMpg_por_bodystyle
+```
+#### d) Agrupelos por bodyStyle los atributos de cityMpg y highWayMpg, obtener la media, la mediana, desviación estandar y el rango inter-cuartil
+
+```{r}
+resumen_cityMpg_highwayMpg <- df %>%
+                              group_by(bodyStyle)%>%
+                        summarise(cityMpg_mean=mean(cityMpg),highwayMpg_mean=mean(highwayMpg),                                               cityMpg_median=median(cityMpg),highwayMpg_median=median(highwayMpg),
+                                  cityMpg_sd=sd(cityMpg),highwayMpg_sd=sd(highwayMpg),
+                                  cityMpg_rec=IQR(cityMpg),highwayMpg_rec=IQR(highwayMpg))
+resumen_cityMpg_highwayMpg
+  
+```
+## 2. VISUALIZACIÓN
+
+### 2.- Usando el paquete ggplot2, crear el grafico que usted encuentre adecuado para responder las siguientes preguntas
+
+#### e) Mostrar la relación entre cityMpg y highwayMpg
+
+```{r}
+ggplot(df, aes(x = cityMpg, y = highwayMpg)) +
+  geom_point() + labs(title="Relación consumo combustible ciudad vs carretera")
+```
+
+
+#### f) Mostrar la distribución de carros por su diseño 
+
+```{r}
+ggplot(num_carros_por_bodystile, aes(x = bodyStyle, y = n)) +
+   geom_bar(stat = "identity") + labs(title="Distribución de vehhiculos por el diseño de su carrocería")
+```
+
+#### g) Mostrar la distribución de carros por su precio (Sugerencia: establecer el anchi de la barra en 5000)
+```{r}
+carros_por_precio <- df%>%
+                    group_by(price)
+
+ggplot(carros_por_precio, aes(x = price)) +
+   geom_histogram(binwidth = 5000) + labs(title="Distribución de vehiculos por precio") 
+```
+#### h) agregar la información de la estimación de densidad el grafico anterior
+
+```{r}
+ggplot(carros_por_precio, aes(x = price)) +
+   geom_histogram(aes(y = after_stat(density)), binwidth = 5000, color = "purple", fill = "lightblue") + labs(title="Distribución de vehiculos por precio vs densidad")
+```
+
+#### i) comprobar (visualmente) si es aceptable considerar ese precio para conseguir una distribución normal
+
+```{r}
+carros_por_precio <- rnorm(103)
+ggplot(data.frame(carros_por_precio), aes(sample = carros_por_precio)) +
+  geom_qq() + labs(title = "distribución normal de una muestra de datos de precio") +
+  geom_qq_line()
+```
+
+#### j) Mostrar la distribucion del precio por el atributo marca (Sugerencia: usar Boxplots y la función coord_flip())
+
+```{r}
+carros_por_precio1 <- df%>%
+                    group_by(price)
+ggplot(carros_por_precio1, aes(x = make, y = price)) +
+  geom_boxplot() +
+  coord_flip()
+```
+#### k) Mostrar la distribución de precios por elatributo nDors(numero de puertas) (Sugerencia: usar histogramas)
+
+```{r}
+histograma1 <- ggplot(new_carro_por_precio, aes(x = price)) +
+  geom_histogram(fill = "steelblue", color = "white", bins = 30) +
+  labs(x = "Precio", y = "count") +
+  ggtitle("Histograma de Precio")
+
+histograma2 <- ggplot(new_carro_por_precio, aes(x = nDoors)) +
+  geom_histogram(fill = "green", color = "white", bins = 30) +
+  labs(x = "num Puertas", y = "count") +
+  ggtitle("Histograma de nDoors")
+grid.arrange(histograma1, histograma2, ncol = 3)
+
+```
+N
+#### l) Mostrar la distribución del precio por bodyStyle y atributos nDoors, (Sugerencia: usar Histogramas)
+
+```{r}
+
+histograma1 <- ggplot(new_carro_por_precio, aes(x = price)) +
+  geom_histogram(fill = "steelblue", color = "white", bins = 30) +
+  labs(x = "Precio", y = "count") +
+  ggtitle("Histograma de Precio")
+
+histograma2 <- ggplot(new_carro_por_precio, aes(x = nDoors)) +
+  geom_histogram(fill = "green", color = "white", bins = 30) +
+  labs(x = "num Puertas", y = "count") +
+  ggtitle("Histograma de nDoors")
+
+histograma3 <- ggplot(new_carro_por_precio, aes(x = bodyStyle)) +
+  geom_histogram(fill = "red", color = "white", bins = 30) +
+  labs(x = "Diseño", y = "count") +
+  ggtitle("Histograma de bodyStyle")
+
+grid.arrange(histograma1, histograma2, histograma3, ncol = 3)
+```
+
+#### m) agregar el parámetro free_y a la función de la faceta en el gráfico anterior
+```{r}
+carros <- new_carro_por_precio %>%
+          group_by(bodyStyle,nDoors)%>%
+          select(price)
+carros
+carros_melt <- reshape2::melt(carros)
+
+  histograma_final <- ggplot(carros_melt, aes(x = value)) +
+  geom_histogram(fill = "steelblue", color = "white", bins = 30) +
+  facet_wrap(~ variable, scales = "free_y") +
+  labs(x = "Valor", y = "count") +
+  ggtitle("Histograma Final")
+  
+  histograma_final
+
+```
