@@ -160,14 +160,14 @@ df_numero_streamings_duplicados
 
 ```{r}
 df_numero_tracks_repetidos <- df_tracks_uri%>%
-  filter(duplicated(tracks_uri))%>%
+  filter(duplicated(track_uri))%>%
   count()
 df_numero_tracks_repetidos
 ```
 ## ahora contamos los datos totales de las pistal
 ```{r}
 df_numero_total_tracks <- df_tracks_uri%>%
-  select(tracks_uri)%>%
+  select(track_uri)%>%
   count()
 df_numero_total_tracks
 ```
