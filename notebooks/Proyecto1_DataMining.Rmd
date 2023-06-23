@@ -3,9 +3,9 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*.
 
 ```{r}
 ##install.packages("dplyr")
@@ -26,25 +26,23 @@ When you save the notebook, an HTML file containing the code and output will be 
 
 The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
 
-# proyecto stream exitoso en spotify
+# **Proyecto Analisis Descriptivo de canciónes y streming mas exitosos en spotify**
 
-# El objetivo de este proyecto es analizar mediante los datos por niveles de un JSON y los datos de entrada de un CSV que contienen los id de los streaming y las pistas escuchadas, cual es el estream y la canción mas escuchada y observar la relación entre un rango de duración de las mismas para determinar entre las mejores canciones si hay alguna influencia en la duración de la canción para su éxito para ser tendencia.
-
-## ##################################################################################
+El objetivo principal de este proyecto es analizar mediante los datos por niveles de un JSON y los datos de entrada de un CSV que contienen los id de los streaming y las pistas escuchadas, cual es el stream o la canción mas escuchada y observar la relación entre un rango de duración de las mismas para determinar entre las mejores canciones si hay alguna influencia en la duración de la canción para su éxito para ser tendencia.
 
 ## Cargamos el primer dataset
 
+## 
 
-## ##################################################################################
+### Primero leemos la data desde el propio JSON
 
-
-## primero leemos la data desde el propio JSON
 ```{r}
 df <- fromJSON("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/Proyecto1/challenge_set.json")
 df
 ```
 
-## Pasamos a un data frame los dtos mas relevantes para nosotros que sería la Playlist
+### Pasamos a un data frame los datos mas relevantes para nosotros que sería la Playlist
+
 ```{r}
 df_spotify <- df$playlists
 df_spotify <- df_spotify%>%
@@ -52,28 +50,26 @@ df_spotify <- df_spotify%>%
 df_spotify
 ```
 
-## Exploramos los datos
+### Exploramos los datos
+
 ```{r}
 df_tracks <- df_spotify$tracks
 head(df_tracks)
 ## observamos que para cada lista de pistas hay valores asociados a cada pista como nombre de artista, nombre de la pista y duracion
 ```
 
-## verificamos si ningun dato tiene elementos NA
+### Verificamos si ningun dato tiene elementos NA
+
 ```{r}
 
 any(is.na(df_tracks))
 ```
 
-## ##################################################################################
+### Cargamos el segundo dataset
 
-## Cargamos el segundo dataset
+## 
 
-
-## ##################################################################################
-
-
-## eliminaremos columnas que no nos sirvan, pero antes debemos analizar el dataset de los numeros de streamings
+#### Eliminaremos columnas que no nos sirvan, pero antes debemos analizar el dataset de los numeros de streamings
 
 ```{r}
 df_data_spotify <- read.csv("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/Proyecto1/sample_submission.csv")
@@ -107,15 +103,19 @@ head(df_tracks_uri,2)
 ##df_data_spotify_unificada <- split(df_data_spotify,tipo_de_dato)
 
 ```
-# exploramos datos por última vez antes de ir a lo nuestro
-## datos pid
+
+### Exploramos datos por última vez antes de ir a lo nuestro
+
+#### datos pid
+
 ```{r}
 primera_columna <- df_data_spotify$X1048588
 df_pid <- data.frame(pid = primera_columna)
 head(df_pid,10)
 ```
 
-## datos tracks_uri
+#### Datos tracks_uri
+
 ```{r}
 df_data_spotify <- read.csv("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/Proyecto1/sample_submission.csv")
 
@@ -127,16 +127,15 @@ df_tracks_uri <- data.frame(track_uri = unlist(listas_filas))
 head(df_tracks_uri,2)
 ```
 
+#### Datos track_uri
 
-# exploramos datos por última vez antes de ir a lo nuestro
-## datos track_uri
 ```{r}
 head(df_tracks_uri,1000)
 ```
 
-## una vez obtenidos los valores que necesitamos procedemos a contarlos
+### Una vez obtenidos los valores que necesitamos procedemos a contarlos
 
-## primero empezaremos con los datos pid que nos da la información de cuantos streamings hubo en el proceso de recolección de datos
+### Primero empezaremos con los datos pid que nos da la información de cuantos streamings hubo en el proceso de recolección de datos
 
 ```{r}
 df_numero_streamings <- df_pid%>%
@@ -146,17 +145,18 @@ df_numero_streamings
 print("ojo que hay que descontar 1000 datos que estaban vacios al realizar la limpieza de los datos ")
 ```
 
+### Revisamos si hay datos duplicados
 
-###revisamos si hay datos duplicados
 ```{r}
 df_numero_streamings_duplicados <- df_pid%>%
   filter(duplicated(pid))%>%
   count()
 df_numero_streamings_duplicados
 ```
-## con esto comprobamos que hay 10000 datos de sesión de streamings
 
-## ahora verifiquemos si hay datos repetidos en la columna de tracks_uri que nos muestra la información de la pista
+### Con esto comprobamos que hay 10000 datos de sesión de streamings
+
+### Ahora verificamos si hay datos repetidos en la columna de tracks_uri que nos muestra la información de la pista
 
 ```{r}
 df_numero_tracks_repetidos <- df_tracks_uri%>%
@@ -164,20 +164,24 @@ df_numero_tracks_repetidos <- df_tracks_uri%>%
   count()
 df_numero_tracks_repetidos
 ```
-## ahora contamos los datos totales de las pistal
+
+### Contamos los datos totales de las pistas
+
 ```{r}
 df_numero_total_tracks <- df_tracks_uri%>%
   select(track_uri)%>%
   count()
 df_numero_total_tracks
 ```
-## realizamos la diferencia para contabilizar el numero real de pistas
+
+### Realizamos la diferencia para contabilizar el numero real de pistas
+
 ```{r}
 num_real_pistas <- df_numero_total_tracks - df_numero_tracks_repetidos
 num_real_pistas
 ```
 
-## ahora contamos los streamings que tiene el otro dataset
+### Contamos los streamings que tiene el otro dataset
 
 ```{r}
 
@@ -187,18 +191,19 @@ num_streamings <- df_spotify%>%
 num_streamings
 
 ```
-#### por lo visto el número de streamings coinciden con los datos del dataset de las pistas
 
-## ahora contamos los datos de las pistas del dataset challenge
+#### El número de streamings coinciden con los datos del dataset de las pistas
 
-## primero unimos los dataframes en uno solo
+### Contamos los datos de las pistas del dataset challenge
+
+#### primero unimos los dataframes en uno solo
 
 ```{r}
 new_df_tracks <- bind_rows(df_tracks, .id = "dataframe_id")
 new_df_tracks
 ```
 
-## ahora contamos el numero de pistas que tiene este dataset
+#### Contamos el numero de pistas que tiene este dataset
 
 ```{r}
 num_tracks <- new_df_tracks%>%
@@ -206,7 +211,8 @@ num_tracks <- new_df_tracks%>%
   count()
 num_tracks
 ```
-## revisamos si no hay repetidos
+
+#### Revisamos si no hay repetidos
 
 ```{r}
 num_tracks <- new_df_tracks%>%
@@ -214,16 +220,19 @@ num_tracks <- new_df_tracks%>%
   count()
 num_tracks
 ```
-## comparamos con el número real de pistas
+
+#### Comparamos con el número real de pistas
 
 ```{r}
 comparison <- data.frame(num_tracks_JSON=num_real_pistas, num_tracks_csv= num_tracks )
 comparison
 ```
-## por lo tanto los datos van acorde con este proyecto
+
+### ... Por lo tanto los datos van acorde con este proyecto.
 
 # Objetivo 1.-
-##Extraer las características de los streaming de canciones y de sus pistas como su nombre, artista, el número de pistas (en el caso del Streaming) y la duración de la pista.
+
+## Extraer las características de los streaming de canciones y de sus pistas como su nombre, artista, el número de pistas (en el caso del Streaming) y la duración de la pista.
 
 ```{r}
 head(df_spotify,10)
@@ -232,7 +241,7 @@ head(new_df_tracks,10)
 
 # Objetivo 2.-
 
-## Hallar las pistas mas sonadas y los streamings más escuchados.
+## Hallar las pistas mas sonadas y el streamings más escuchados.
 
 ```{r}
 pistas_mas_sonadas <- left_join(new_df_tracks, df_tracks_uri, by="track_uri")
@@ -240,10 +249,11 @@ conteo <- pistas_mas_sonadas %>% count(track_uri)
 pistas_mas_sonadas <- left_join(new_df_tracks, conteo, by="track_uri")
 pistas_mas_sonadas <- arrange(pistas_mas_sonadas,desc(n))
 pistas_mas_sonadas_top <- distinct(pistas_mas_sonadas,track_uri,.keep_all = TRUE)
+colnames(pistas_mas_sonadas_top)[colnames(pistas_mas_sonadas_top) == "n"] <- "popularidad"
 pistas_mas_sonadas_top
 ```
 
-## ahora guardaremos en un dataframe los 1000 mas escuchados y desplegaremos los 10 mas escuchados
+#### Guardamos en un dataframe los 1000 mas escuchados y desplegaremos los 10 mas escuchados
 
 ```{r}
 
@@ -252,22 +262,16 @@ top_10 <- head(pistas_mas_sonadas_top,10)
 top_10
 ```
 
-## realizamos el grafico de audiencia del top 10
+#### Realizamos el grafico de audiencia del top 10
 
 ```{r}
-
-grafico <- ggplot(top_10, aes(x = track_name, y = n)) +
+grafico <- ggplot(top_10, aes(x = track_name, y = popularidad)) +
   geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
 grafico
 ```
 
-## ahora veremos cual es el streaming mas escuchado, de base tendremos el top de las 10 canciones mas escuchadas y el top de los streamings dependerá del numero de holdouts y del numero de pistas que tenga
+#### Vemos cual es el mejor streaming
 
-```{r}
-streamings_mas_pausados <- arrange(df_spotify,desc(num_holdouts))
-streamings_mas_pausados
-```
-## vemos cual es el mejor streaming
 ```{r}
 mejor_streaming <- df_spotify%>%
   filter(indice == top_10$dataframe_id)
@@ -277,23 +281,57 @@ lista_pistas <- new_df_tracks%>%
   filter(dataframe_id == 8)
 lista_pistas
 ```
-## contiene una pista que esta en el top 10 , no contiene solo 5 pistas 
+
+#### El Artista mas escuchado debido a su numero de canciones mas escuchadas
+
+```{r}
+ggplot(top_10, aes(x = artist_name, y = popularidad)) +
+  geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+#### El Album mas escuchado debido a su numero de canciones mas escuchadas dentro de este
+
+```{r}
+
+ggplot(top_10, aes(x = album_name, y = popularidad)) +
+  geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
 
 # Objetivo 3.-
 
-## Relacionar las características de cada canción con los resultados para determinar que tienen en común.
+### Relacionar las características de cada canción con los resultados para determinar que tienen en común.
 
-### jugaremos con el top 1000 de canciones, haciendo un grafico de dispersión respecto al tiempo de duración de la canción con el top
+#### Realizamos un gráfico de burbujas para relacionar la popularidad vs un album y su artista
 
 ```{r}
-relación_dpopularidad_duración_pista <- ggplot(top_1000, aes(x = n, y = duration_ms)) +
-  geom_point()
+ggplot(top_10, aes(x = artist_name , y = album_name, size = popularidad)) +
+  geom_point() +
+  xlab("Artista") +
+  ylab("Album") +
+  scale_size_continuous(name = "popularidad") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+```
+
+#### Realizamos un gráfico de burbujas para relacionar la popularidad vs un album y sus canciones
+
+```{r}
+ggplot(top_10, aes(x = track_name , y = album_name, size = popularidad)) +
+  geom_point() +
+  xlab("Pista") +
+  ylab("Album") +
+  scale_size_continuous(name = "popularidad") + theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+```
+
+#### Jugaremos con el top 1000 de canciones, haciendo un grafico de dispersión respecto al tiempo de duración de la canción con el top
+
+```{r}
+mediana_duración <- median(top_1000$duration_ms)
+mediana_duración/60000
+relación_dpopularidad_duración_pista <- ggplot(top_1000, aes(x = popularidad, y = duration_ms)) +
+  geom_point() + geom_hline(yintercept = mediana_duración)
 relación_dpopularidad_duración_pista
 ```
-## podemos concluir que las canciones mas escuchadas están en un rango entre 2 minutos y 3 minutos, la mas escuchada está en el intervalo menor a 2 minutos y medio
 
-## como conclusión final tenemos que para que una canción sea popular su duración debe estar apegada al rango de entre 2 a 2 minutos y medio
+#### Podemos concluir que las canciones mas escuchadas están en un rango entre 3 min y 4 minutos, la mas escuchada está en 3 minutos 45 segundos, tambien otra caracteristica es que debe tener mas de un albun para que en uno de estos sus al menos una de sus canciones alcance el top y si es mas de una como en el caso del Artista Drake, de esta forma el streaming y la popularidad como artista sera mayor.
 
-
-
-
+#### Para mi perspectiva, el enfoque al que quería llegar era diferente, intuyo que debido a que los datos fueron tomados en tiempo mucho antes de la Pandemia del 2019 en la que la cultura cambió bastante, se esperaba que canciones con corta duración sean mas populares que una de larga duración, como referencia a videos de corta duración de Tik Tok.
