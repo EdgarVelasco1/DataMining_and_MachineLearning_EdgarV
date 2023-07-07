@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  pdf_document: default
+  word_document: default
 ---
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
@@ -12,11 +14,11 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 ##install.packages("jsonlite")
 ##install.packages("rjson")
 ##install.packages("ggplot2")
-library(conflicted)
+##library(conflicted)
 library(rjson)
 library(dplyr)
-library(jsonlite)
-library(tidyverse)
+##library(jsonlite)
+##library(tidyverse)
 library(ggplot2)
 ```
 
@@ -37,7 +39,7 @@ El objetivo principal de este proyecto es analizar mediante los datos por nivele
 ### Primero leemos la data desde el propio JSON
 
 ```{r}
-df <- fromJSON("C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/Proyecto1/challenge_set.json")
+df <- fromJSON('C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/Proyecto1/challenge_set.json')
 df
 ```
 
