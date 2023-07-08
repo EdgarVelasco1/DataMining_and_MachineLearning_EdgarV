@@ -2,23 +2,23 @@
 title: "R Notebook"
 output:
   pdf_document: default
-  word_document: default
+  html_notebook: default
 ---
 
 This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code.
 
 Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*.
 
-```{r}
+```{r, eval=FALSE}
 ##install.packages("dplyr")
 ##install.packages("jsonlite")
 ##install.packages("rjson")
 ##install.packages("ggplot2")
-##library(conflicted)
+library(conflicted)
 library(rjson)
 library(dplyr)
-##library(jsonlite)
-##library(tidyverse)
+library(jsonlite)
+library(tidyverse)
 library(ggplot2)
 ```
 
@@ -39,7 +39,7 @@ El objetivo principal de este proyecto es analizar mediante los datos por nivele
 ### Primero leemos la data desde el propio JSON
 
 ```{r}
-df <- fromJSON('C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/Proyecto1/challenge_set.json')
+df <- jsonlite::fromJSON('C:/Users/Edgar/Documents/GitHub/DataMining_and_MachineLearning_EdgarV/data/Proyecto1/challenge_set.json')
 df
 ```
 
@@ -151,7 +151,7 @@ print("ojo que hay que descontar 1000 datos que estaban vacios al realizar la li
 
 ```{r}
 df_numero_streamings_duplicados <- df_pid%>%
-  filter(duplicated(pid))%>%
+  dplyr::filter(duplicated(pid))%>%
   count()
 df_numero_streamings_duplicados
 ```
@@ -162,7 +162,7 @@ df_numero_streamings_duplicados
 
 ```{r}
 df_numero_tracks_repetidos <- df_tracks_uri%>%
-  filter(duplicated(track_uri))%>%
+  dplyr::filter(duplicated(track_uri))%>%
   count()
 df_numero_tracks_repetidos
 ```
@@ -276,11 +276,11 @@ grafico
 
 ```{r}
 mejor_streaming <- df_spotify%>%
-  filter(indice == top_10$dataframe_id)
+  dplyr::filter(indice == top_10$dataframe_id)
 mejor_streaming
 
 lista_pistas <- new_df_tracks%>%
-  filter(dataframe_id == 8)
+  dplyr::filter(dataframe_id == 8)
 lista_pistas
 ```
 
